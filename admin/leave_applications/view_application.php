@@ -24,6 +24,7 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
     <?php if($_settings->userdata('type') != 3): ?>
     <p class="m-0"><b>Employee ID: </b> <br><span class="mx-2"><?php echo $employee_id ?></span></p>
     <p class="m-0"><b>Name: </b> <br><span class="mx-2"><?php echo $name ?></span></p>
+    <p class="m-0"><b>Office/Department: </b> <br><span class="mx-2"><?php echo $name ?></span></p>
     <?php endif; ?>
     <p class="m-0"><b>Leave Type: </b> <br><span class="mx-2"><?php echo $code.' - '.$lname ?></span></p>
     <p class="m-0"><b>Date: </b> <br><span class="mx-2">

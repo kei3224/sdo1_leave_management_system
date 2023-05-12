@@ -1,18 +1,26 @@
 <?php
-if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT * from `leave_applications` where id = '{$_GET['id']}' ");
-    if ($qry->num_rows > 0) {
-        foreach ($qry->fetch_assoc() as $k => $v) {
-            $$k = $v;
+if(isset($_GET['id']) && $_GET['id'] > 0){
+    $qry = $conn->query("SELECT l.*,concat(u.lastname,' ',u.firstname,' ',u.middlename) as `name`,lt.code,lt.name as lname from `leave_applications` l inner join `users` u on l.user_id=u.id inner join `leave_types` lt on lt.id = l.leave_type_id  where l.id = '{$_GET['id']}' ");
+    if($qry->num_rows > 0){
+        foreach($qry->fetch_assoc() as $k => $v){
+            $$k=$v;
         }
     }
+     $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'employee_id' ");
+     $employee_id = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
+
+    //  $department_qry = $conn->query("SELECT id,name FROM department_list");
+    //  $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
+     
+    //  $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'department_id' ");
+    //  $deptoffice = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
+
+    //  $empdept_qry = $conn->query("SELECT ");
+
+    // $department_qry = $conn->query("SELECT id,name FROM department_list");
+	// $dept_arr = array_column($department_qry->fetch_all(MYSQLI_ASSOC),'name','id');
 }
-if ($_settings->userdata('type') == 3) {
-    $meta_qry = $conn->query("SELECT * FROM employee_meta where meta_field = 'leave_type_ids' and user_id = '{$_settings->userdata('id')}' ");
-    $leave_type_ids = $meta_qry->num_rows > 0 ? $meta_qry->fetch_array()['meta_value'] : '';
-}
-?>
-<?php
+
 // Include the main TCPDF library (search for installation path).
 ob_clean();
 require_once('TCPDF/tcpdf.php');
@@ -39,7 +47,7 @@ require_once('TCPDF/tcpdf.php');
 //        exit;
 //    }
 
-$employee_id = 'lastname';
+// $employee_id = 'lastname'   ;
 
 class PDF extends TCPDF
 {
@@ -95,6 +103,9 @@ $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 // set auto page breaks
 $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
+
+//set margin bottom
+$pdf->SetAutoPageBreak(true, 20);
 // set image scale factor
 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
@@ -148,7 +159,10 @@ $pdf->Cell(0, 3, '', 0, 1, 'C');
 // Set some content to print
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(202, 5, ' 1. OFFICE DEPARTMENT                      2. NAME:             (Last)                               (First)                             (Middle)', 'LTR', 1, '');
-$pdf->Cell(202, 8, '  Answer: '. $employee_id .' name ', 'LRB', 1, '');
+
+$pdf->SetFont('helvetica', 'B', 12);
+$pdf->Cell(202, 8,  '  '. $employee_id .   '                    '. $name .' ', 'LRB', 1, '');
+$pdf->Cell(202, 8, '  Answer: ', 'LRB', 1, '');
 
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(202, 5, ' 1. OFFICE DEPARTMENT                      2. NAME:             (Last)                               (First)                             (Middle)', 'LTR', 1, '');
