@@ -77,7 +77,7 @@ var myLineChart = new Chart(ctx, {
                     padding: 10,
                     stepSize: 10, // add this line to set the step size to 10
                     min: 0,
-                    max: 100, // add this line to set the max value to 100
+                    max: 200, // add this line to set the max value to 100
                     callback: function (value, index, values) {
                         return value;
                     }

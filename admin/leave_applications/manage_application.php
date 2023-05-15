@@ -76,7 +76,8 @@ if ($_settings->userdata('type') == 3) {
 						<select id="type" name="type" class="form-control rounded-0">
 							<option value="1" <?php echo (isset($type) && $type == 1) ? 'selected' : '' ?>>Whole Day
 							</option>
-							<option value="2" <?php echo (isset($type) && $type == 2) ? 'selected' : '' ?>>Half Day</option>
+							<option value="2" <?php echo (isset($type) && $type == 2) ? 'selected' : '' ?>>Half Day
+							</option>
 						</select>
 					</div>
 					<div class="form-group">
@@ -89,32 +90,11 @@ if ($_settings->userdata('type') == 3) {
 						<input type="date" id="date_end" class="form-control form" required name="date_end"
 							value="<?php echo isset($date_end) ? date("Y-m-d", strtotime($date_end)) : '' ?>">
 					</div>
-
-					<!-- <div class="form-group">
-						<label for="leave_days" class="control-label">Days</label>
-						<?php
-						$date_start = isset($_POST['date_start']) ? $_POST['date_start'] : '';
-						$date_end = isset($_POST['date_end']) ? $_POST['date_end'] : '';
-
-						// Count the number of days between the start and end dates
-						$start = strtotime($date_start);
-						$end = strtotime($date_end);
-						$days = 0;
-						for ($i = $start; $i <= $end; $i = strtotime('+1 day', $i)) {
-							if (date('N', $i) < 6) { // Check if the day is not a Saturday or Sunday
-								$days++;
-							}
-						}
-						?>
-						<input type="number" id="leave_days" class="form-control form" name="leave_days" value="<?php echo $days ?>" readonly>
-					</div> -->
-					<!-- Note about the negative results may turn into adding the leave credits-->
-
 					<div class="form-group">
 						<label for="leave_days" class="control-label">Days</label>
-						<input type="number" id="leave_days" class="form-control form" name="leave_days" value="<?php echo abs(isset($leave_days)) ? $leave_days : 0 ?>" readonly>
+						<input type="number" id="leave_days" class="form-control form" name="leave_days"
+							value="<?php echo isset($leave_days) ? $leave_days : 0 ?>" readonly>
 					</div>
-
 					<div class="form-group">
 						<label for="reason">Reason</label>
 						<textarea rows="3" name="reason" id="reason" class="form-control rounded-0"
@@ -126,7 +106,8 @@ if ($_settings->userdata('type') == 3) {
 		</form>
 	</div>
 	<div class="card-footer">
-		<button class="btn btn-flat btn-primary" form="leave_application-form">Save</button>
+		<button class="btn btn-flat btn-primary" onclick="return calculateDays()"
+			form="leave_application-form">Save</button>
 		<a class="btn btn-flat btn-default" href="?page=leave_applications">Cancel</a>
 	</div>
 </div>
@@ -157,6 +138,21 @@ if ($_settings->userdata('type') == 3) {
 			$('#leave_days').val(days + 1)
 
 	}
+
+	function calculateDays() {
+		const startDate = new Date(document.getElementById('date_start').value);
+		const endDate = new Date(document.getElementById('date_end').value);
+		if (endDate < startDate) {
+			window.alert('Error: End date must be after start date.');
+			document.getElementById('leave_days').value = '';
+			return false;
+		} else {
+			const days = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+			document.getElementById('leave_days').value = days;
+			return true;
+		}
+	}
+
 	$(document).ready(function () {
 		$('.select2').select2();
 		$('.select2-selection').addClass('form-control rounded-0')
