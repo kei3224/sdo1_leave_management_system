@@ -83,17 +83,22 @@ if ($_settings->userdata('type') == 3) {
 					<div class="form-group">
 						<label for="date_start" class="control-label">Date Start</label>
 						<input type="date" id="date_start" class="form-control form" required name="date_start"
-							value="<?php echo isset($date_start) ? date("Y-m-d", strtotime($date_start)) : '' ?>">
+							value="<?php echo isset($date_start) ? date("Y-m-d", strtotime($date_start)) : '' ?>"
+							onchange="calculateLeaveDays()">
 					</div>
 					<div class="form-group">
 						<label for="date_end" class="control-label">Date End</label>
 						<input type="date" id="date_end" class="form-control form" required name="date_end"
-							value="<?php echo isset($date_end) ? date("Y-m-d", strtotime($date_end)) : '' ?>">
+							value="<?php echo isset($date_end) ? date("Y-m-d", strtotime($date_end)) : '' ?>"
+							onchange="calculateLeaveDays()">
 					</div>
 					<div class="form-group">
 						<label for="leave_days" class="control-label">Days</label>
-						<input type="number" id="leave_days" class="form-control form" name="leave_days"
-							value="<?php echo isset($leave_days) ? $leave_days : 0 ?>" readonly>
+						<input type="hidden" id="leave_days" class="form-control form" name="leave_days"
+							value="<?php echo isset($leave_days) ? $leave_days : 0 ?>">
+						<span id="leave_days_display">
+							<?php echo isset($leave_days) ? $leave_days : 0 ?>
+						</span>
 					</div>
 					<div class="form-group">
 						<label for="reason">Reason</label>
@@ -112,6 +117,43 @@ if ($_settings->userdata('type') == 3) {
 	</div>
 </div>
 <script>
+function calculateLeaveDays() {
+        var startDate = new Date(document.getElementById("date_start").value);
+        var endDate = new Date(document.getElementById("date_end").value);
+        var leaveDays = 0;
+
+        while (startDate <= endDate) {
+            var dayOfWeek = startDate.getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude weekends
+                var formattedDate = formatDate(startDate);
+                var isHoliday = checkHoliday(formattedDate);
+                if (!isHoliday) {
+                    leaveDays++;
+                }
+            }
+            startDate.setDate(startDate.getDate() + 1);
+        }
+
+        document.getElementById("leave_days").value = leaveDays;
+        document.getElementById("leave_days_display").textContent = leaveDays;
+    }
+
+    function formatDate(date) {
+        var year = date.getFullYear();
+        var month = (date.getMonth() + 1).toString().padStart(2, "0");
+        var day = date.getDate().toString().padStart(2, "0");
+        return year + "-" + month + "-" + day;
+    }
+
+    function checkHoliday(date) {
+        var holidays = [
+            "2023-01-01", "2023-04-09", "2023-04-15", "2023-05-01", "2023-06-12",
+            "2023-08-28", "2023-11-01", "2023-11-30", "2023-12-25", "2023-12-30", "2023-12-31"
+        ];
+
+        return holidays.includes(date);
+    }
+
 	function displayImg(input, _this) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
