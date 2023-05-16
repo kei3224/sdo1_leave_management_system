@@ -99,8 +99,7 @@ if ($_settings->userdata('type') == 3) {
 		</form>
 	</div>
 	<div class="card-footer">
-		<button class="btn btn-flat btn-primary" 
-			form="leave_application-form">Save</button>
+		<button class="btn btn-flat btn-primary" form="leave_application-form">Save</button>
 		<a class="btn btn-flat btn-default" href="?page=leave_applications">Cancel</a>
 	</div>
 </div>
@@ -112,13 +111,30 @@ if ($_settings->userdata('type') == 3) {
 
 		while (startDate <= endDate) {
 			var dayOfWeek = startDate.getDay();
-			if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude weekends
-				leaveDays++;
+
+			// Exclude weekends (Saturday and Sunday)
+			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+				// Exclude Philippine holidays (customize this part according to your holiday list)
+				var isHoliday = checkIfPhilippineHoliday(startDate);
+				if (!isHoliday) {
+					leaveDays++;
+				}
 			}
+
 			startDate.setDate(startDate.getDate() + 1);
 		}
 
 		updateLeaveDays(leaveDays);
+	}
+
+	function checkIfPhilippineHoliday(date) {
+		// Modify this function to check if the provided date is a Philippine holiday
+		// You can use an array of holiday dates or make an API call to retrieve the holiday list
+		// Return true if it's a holiday, false otherwise
+		// Example:
+		var holidayDates = ['2023-05-25', '2023-12-25', '2023-12-30']; // Placeholder holiday dates
+		var dateString = date.toISOString().split('T')[0];
+		return holidayDates.includes(dateString);
 	}
 
 	function updateLeaveDays(leaveDays) {
@@ -132,6 +148,9 @@ if ($_settings->userdata('type') == 3) {
 		};
 		xhr.send("leave_days=" + leaveDays);
 	}
+
+
+
 	function displayImg(input, _this) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
