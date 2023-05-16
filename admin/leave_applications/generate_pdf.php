@@ -1,35 +1,57 @@
 <?php
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT l.*,concat(u.lastname,'            ',u.firstname,'             ',u.middlename) as `name`,lt.code,lt.name as lname from `leave_applications` l inner join `users` u on l.user_id=u.id inner join `leave_types` lt on lt.id = l.leave_type_id  where l.id = '{$_GET['id']}' ");
+    $qry = $conn->query("SELECT l.*,concat(u.lastname,'         ',u.firstname,'       ',u.middlename) as `name`,
+    lt.code,lt.name as lname 
+    from `leave_applications` l 
+    inner join `users` u on l.user_id=u.id 
+    inner join `leave_types` lt on lt.id = l.leave_type_id  
+    where l.id = '{$_GET['id']}' ");
+
     if ($qry->num_rows > 0) {
         foreach ($qry->fetch_assoc() as $k => $v) {
             $$k = $v;
         }
+        // Fetch department_id from employee_meta table based on user_id
+        $metaQuery = $conn->query("SELECT meta_value FROM `employee_meta` WHERE meta_field = 'department_id' AND user_id = (SELECT user_id FROM `leave_applications` WHERE id = '{$id}')");
+
+        if ($metaQuery->num_rows > 0) {
+            $metaData = $metaQuery->fetch_assoc();
+            $department_id = $metaData['meta_value']; // Assign department_id to the variable
+
+            // Fetch department information for the department_id
+            $departmentQuery = $conn->query("SELECT * FROM `department_list` WHERE id = '{$department_id}'");
+
+            if ($departmentQuery->num_rows > 0) {
+                $departmentData = $departmentQuery->fetch_assoc();
+                $departmentName = $departmentData['name']; // Assign department name to a variable
+                //echo "Department: " . $departmentName; // Output the department name
+            }
+        }
     }
-    $department_id = 123;
-    $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'employee_id' ");
-    $employee_id = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
-
-    $department_qry = $conn->query("SELECT id,name FROM department_list");
-    $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
-
-    // $sql = "SELECT department_list.name FROM employee_meta JOIN department_list ON employee_meta.department_id = department_id WHERE department_list.id = $department_id";
-
-    // $result = mysqli_query($conn,$sql);
-
-    // $row = mysqli_fetch_assoc($result);
 }
-    
-    //  $department_qry = $conn->query("SELECT id,name FROM department_list");
-    //  $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
+$department_id = 123;
+// $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'employee_id' ");
+// $employee_id = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
 
-    //  $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'department_id' ");
-    //  $deptoffice = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
+// $department_qry = $conn->query("SELECT id,name FROM department_list");
+// $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
 
-    //  $empdept_qry = $conn->query("SELECT ");
+// $sql = "SELECT department_list.name FROM employee_meta JOIN department_list ON employee_meta.department_id = department_id WHERE department_list.id = $department_id";
 
-    // $department_qry = $conn->query("SELECT id,name FROM department_list");
-    // $dept_arr = array_column($department_qry->fetch_all(MYSQLI_ASSOC),'name','id');
+// $result = mysqli_query($conn,$sql);
+
+// $row = mysqli_fetch_assoc($result);
+
+//  $department_qry = $conn->query("SELECT id,name FROM department_list");
+//  $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
+
+//  $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'department_id' ");
+//  $deptoffice = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
+
+//  $empdept_qry = $conn->query("SELECT ");
+
+// $department_qry = $conn->query("SELECT id,name FROM department_list");
+// $dept_arr = array_column($department_qry->fetch_all(MYSQLI_ASSOC),'name','id');
 
 // Include the main TCPDF library (search for installation path).
 ob_clean();
@@ -60,7 +82,7 @@ class PDF extends TCPDF
 {
     public function Header()
     {
-        
+
     }
 
     public function Footer()
@@ -165,12 +187,12 @@ $pdf->Cell(0, 3, '', 0, 1, 'C');
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(202, 5, ' 1. OFFICE DEPARTMENT                      2. NAME:             (Last)                               (First)                             (Middle)', 'LTR', 1, '');
 $pdf->SetFont('helvetica', 'B', 12);
-$pdf->Cell(80, 8, '  '. $employee_id . '  ', 'LB');
+$pdf->Cell(80, 8, '  ' . $departmentName . '  ', 'LB');
 $pdf->Cell(122, 8, '  ' . $name . '  ', 'RB');
 $pdf->Ln();
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(202, 10, ' 3. DATE OF FILING________________       4. POSITION:_________________________      5. SALARY ________________', 1, 1, '');
+$pdf->Cell(202, 10, ' 3. DATE OF FILING______________             4. POSITION:_____________________________             5. SALARY ________________', 1, 1, '');
 
 $pdf->SetFont('helvetica', '', 1);
 $pdf->Cell(202, 0, ' ', 1, 1, 'C');
