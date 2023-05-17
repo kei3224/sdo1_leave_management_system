@@ -1,83 +1,76 @@
 <?php
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $qry = $conn->query("SELECT l.*,concat(u.lastname,'         ',u.firstname,'       ',u.middlename) as `name`,
-    lt.code,lt.name as lname 
-    from `leave_applications` l 
-    inner join `users` u on l.user_id=u.id 
-    inner join `leave_types` lt on lt.id = l.leave_type_id  
-    where l.id = '{$_GET['id']}' ");
+    $id = $_GET['id']; // Store the 'id' parameter in a variable
+
+    // Fetch leave application data and related information
+    $qry = $conn->query("SELECT l.*, 
+        u.lastname AS user_lastname, 
+        u.firstname AS user_firstname, 
+        u.middlename AS user_middlename,
+        lt.code, lt.name as lname 
+        FROM `leave_applications` l 
+        INNER JOIN `users` u ON l.user_id = u.id 
+        INNER JOIN `leave_types` lt ON lt.id = l.leave_type_id  
+        WHERE l.id = '{$id}'");
 
     if ($qry->num_rows > 0) {
-        foreach ($qry->fetch_assoc() as $k => $v) {
-            $$k = $v;
+        $data = $qry->fetch_assoc();
+
+        extract($data);
+
+        // Fetch department information for the department_id
+        $departmentQuery = $conn->query("SELECT * FROM `department_list` WHERE id = (SELECT meta_value FROM `employee_meta` WHERE meta_field = 'department_id' AND user_id = (SELECT user_id FROM `leave_applications` WHERE id = '{$id}'))");
+
+        if ($departmentQuery->num_rows > 0) {
+            $departmentData = $departmentQuery->fetch_assoc();
+            $departmentName = $departmentData['name']; // Assign department name to a variable
+            //echo "Department: " . $departmentName; // Output the department name
         }
-        // Fetch department_id from employee_meta table based on user_id
-        $metaQuery = $conn->query("SELECT meta_value FROM `employee_meta` WHERE meta_field = 'department_id' AND user_id = (SELECT user_id FROM `leave_applications` WHERE id = '{$id}')");
 
-        if ($metaQuery->num_rows > 0) {
-            $metaData = $metaQuery->fetch_assoc();
-            $department_id = $metaData['meta_value']; // Assign department_id to the variable
+        // Fetch the date of filing from the leave_applications table
+        $dateQuery = $conn->query("SELECT date_created FROM `leave_applications` WHERE id = '{$id}'");
 
-            // Fetch department information for the department_id
-            $departmentQuery = $conn->query("SELECT * FROM `department_list` WHERE id = '{$department_id}'");
+        if ($dateQuery->num_rows > 0) {
+            $dateData = $dateQuery->fetch_assoc();
+            $dateOfFiling = $dateData['date_created']; // Assign the date of filing to a variable
+            //echo "Date of Filing: " . $dateOfFiling; // Output the date of filing
+        }
 
-            if ($departmentQuery->num_rows > 0) {
-                $departmentData = $departmentQuery->fetch_assoc();
-                $departmentName = $departmentData['name']; // Assign department name to a variable
-                //echo "Department: " . $departmentName; // Output the department name
-            }
+        // Fetch designation name for the designation_id
+        $designationQuery = $conn->query("SELECT name FROM `designation_list` WHERE id = (SELECT meta_value FROM `employee_meta` WHERE meta_field = 'designation_id' AND user_id = (SELECT user_id FROM `leave_applications` WHERE id = '{$id}'))");
+
+        if ($designationQuery->num_rows > 0) {
+            $designationData = $designationQuery->fetch_assoc();
+            $designationName = $designationData['name']; // Assign designation name to a variable
+            //echo "Designation: " . $designationName; // Output the designation name
+        }
+
+        // Fetch the number of leave days from the leave_applications table
+        $leaveDaysQuery = $conn->query("SELECT leave_days FROM `leave_applications` WHERE id = '{$id}'");
+
+        if ($leaveDaysQuery->num_rows > 0) {
+            $leaveDaysData = $leaveDaysQuery->fetch_assoc();
+            $numberOfLeaveDays = $leaveDaysData['leave_days']; // Assign the number of leave days to a variable
+            //echo "Number of Leave Days: " . $numberOfLeaveDays; // Output the number of leave days
+        }
+
+        // Fetch date start and date end from the leave_applications table
+        $dateQuery = $conn->query("SELECT DATE(date_start) AS start_date, DATE(date_end) AS end_date FROM `leave_applications` WHERE id = '{$id}'");
+
+        if ($dateQuery->num_rows > 0) {
+            $dateData = $dateQuery->fetch_assoc();
+            $dateStart = $dateData['start_date']; // Assign the date start to a variable
+            $dateEnd = $dateData['end_date']; // Assign the date end to a variable
+
+            // Create the inclusive dates string
+            $inclusive_dates = $dateStart . ' to ' . $dateEnd;
+            //echo "Inclusive Dates: " . $inclusive_dates; // Output the inclusive dates
         }
     }
 }
-$department_id = 123;
-// $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'employee_id' ");
-// $employee_id = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
-
-// $department_qry = $conn->query("SELECT id,name FROM department_list");
-// $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
-
-// $sql = "SELECT department_list.name FROM employee_meta JOIN department_list ON employee_meta.department_id = department_id WHERE department_list.id = $department_id";
-
-// $result = mysqli_query($conn,$sql);
-
-// $row = mysqli_fetch_assoc($result);
-
-//  $department_qry = $conn->query("SELECT id,name FROM department_list");
-//  $department_list = ($department_qry->num_rows > 0) ? $department_qry->fetch_array() : "N/A";
-
-//  $empid_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'department_id' ");
-//  $deptoffice = ($empid_qry->num_rows > 0) ? $empid_qry->fetch_array()['meta_value'] : "N/A";
-
-//  $empdept_qry = $conn->query("SELECT ");
-
-// $department_qry = $conn->query("SELECT id,name FROM department_list");
-// $dept_arr = array_column($department_qry->fetch_all(MYSQLI_ASSOC),'name','id');
-
-// Include the main TCPDF library (search for installation path).
 ob_clean();
+// Include the main TCPDF library (search for installation path).
 require_once('TCPDF/tcpdf.php');
-//  // fetching the data and insertiong into the pdf
-//  if (isset($_GET['id']) && $_GET['id'] > 0) {
-//      $qry = $conn->query("SELECT l.*,concat(u.lastname,' ',u.firstname,' ',u.middlename) as `name`,lt.code,lt.name as lname from `leave_applications` l inner join `users` u on l.user_id=u.id inner join `leave_types` lt on lt.id = l.leave_type_id  where l.id = '{$_GET['id']}' ");
-//      //  if ($qry->num_rows > 0) {
-//      //      foreach ($qry->fetch_assoc() as $k => $v) {
-//      //          $$k = $v;
-//      //      }
-//      //  }
-//      $lt_qry = $conn->query("SELECT meta_value FROM `employee_meta` where user_id = '{$user_id}' and meta_field = 'employee_id' ");
-//      $employee_id = ($lt_qry->num_rows > 0) ? $lt_qry->fetch_array()['meta_value'] : "N/A";
-//  }
-//    $config_path =  "config.php";
-//    // Use the "require_once" statement to include the file
-//    if (file_exists($config_path)) {
-//        require_once $config_path;
-//        echo "Executed";
-//       // Continue executing the script
-//    } else {
-//        // If the file does not exist, output an error message and exit the script
-//        echo "Error: could not include file {$config_path}";
-//        exit;
-//    }
 class PDF extends TCPDF
 {
     public function Header()
@@ -185,14 +178,29 @@ $pdf->Cell(0, 3, '', 0, 1, 'C');
 
 //adding the contents
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(202, 5, ' 1. OFFICE DEPARTMENT                      2. NAME:             (Last)                               (First)                             (Middle)', 'LTR', 1, '');
-$pdf->SetFont('helvetica', 'B', 12);
-$pdf->Cell(80, 8, '  ' . $departmentName . '  ', 'LB');
-$pdf->Cell(122, 8, '  ' . $name . '  ', 'RB');
+$pdf->Cell(202, 5, ' 1. OFFICE DEPARTMENT                      2. NAME:             (Last)                                  (First)                                  (Middle)', 'LTR', 1, '');
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(82, 8, '  ' . $departmentName . '  ', 'LB');
+$pdf->Cell(37, 8, '  ' . $user_lastname . '  ' , 'B');
+$pdf->Cell(39, 8, '  ' . $user_firstname . '  ', 'B');
+$pdf->Cell(44, 8, '  ' . $user_middlename . '  ', 'RB');
 $pdf->Ln();
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(202, 10, ' 3. DATE OF FILING______________             4. POSITION:_____________________________             5. SALARY ________________', 1, 1, '');
+$pdf->Cell(31, 10, ' 3. DATE OF FILING  ', 'LB');
+
+$pdf->SetFont('helvetica', 'BU', 9);
+$pdf->Cell(39, 10, '' . $dateOfFiling . '', 'B');
+
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(22, 10, ' 4. POSITION  ', 'B');
+
+$pdf->SetFont('helvetica', 'BU', 9);
+$pdf->Cell(55, 10, '' . $designationName . ' ', 'B');
+
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(55, 10, ' 5. SALARY __________________  ', 'BR');
+$pdf->Ln();
 
 $pdf->SetFont('helvetica', '', 1);
 $pdf->Cell(202, 0, ' ', 1, 1, 'C');
@@ -375,15 +383,16 @@ $pdf->Cell(115, 8, " 6.C NUMBER OF WORKING DAYS APPLIED FOR    ", 'TLR');
 $pdf->Cell(87, 8, " 6.D COMMUTATION", 'TLR');
 $pdf->Ln();
 
-$pdf->SetFont('helvetica', 'I', 10);
-$pdf->Cell(115, 6, '      ________________________________________', 'LR');
+$pdf->Cell(6, 6, '', 'L');
+$pdf->SetFont('helvetica', 'BU', 10);
+$pdf->Cell(109, 6, '' . $numberOfLeaveDays . '                                                                              ', 'R');
 $pdf->SetFont('dejavusans', '', 14);
 $pdf->Cell(9, 6, '   ☐', 'L');
 $pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(78, 6, " Not Requested", 'R');
 $pdf->Ln();
 
-$pdf->SetFont('helvetica', 'I', 10);
+$pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(115, 6, '      INCLUSIVE DATES', 'LR');
 $pdf->SetFont('dejavusans', '', 14);
 $pdf->Cell(9, 6, '   ☐', 'L');
@@ -391,8 +400,9 @@ $pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(78, 6, " Requested", 'R');
 $pdf->Ln();
 
-$pdf->SetFont('helvetica', 'I', 10);
-$pdf->Cell(115, 6, '      ________________________________________', 'LR');
+$pdf->Cell(6, 6, '', 'L');
+$pdf->SetFont('helvetica', 'BU', 10);
+$pdf->Cell(109, 6, '' . $inclusive_dates . '                                      ', 'R');
 $pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(87, 0, "    ________________________________________", 'LR');
 $pdf->Ln();
@@ -414,8 +424,13 @@ $pdf->Cell(115, 8, " 7.A CERTIFICATION OF LEAVE CREDITS    ", 'LR');
 $pdf->Cell(87, 8, " 7.B RECOMMENDATION", 'LR');
 $pdf->Ln();
 
+// Fetching the date when the pdf was generated
+$date_today = date('Y-m-d H:i:s');
+
 $pdf->SetFont('helvetica', '', 10);
-$pdf->Cell(115, 6, '                             As of ____________________________', 'LR');
+$pdf->Cell(40, 6, '                             As of', 'L');
+$pdf->SetFont('helvetica', 'BU', 10);
+$pdf->Cell(75, 6, ''. $date_today. '', 'R');
 $pdf->SetFont('dejavusans', '', 14);
 $pdf->Cell(9, 6, '   ☐', 'L');
 $pdf->SetFont('helvetica', '', 10);
@@ -449,7 +464,7 @@ $pdf->Ln();
 
 $pdf->SetFont('helvetica', 'I', 10);
 $pdf->Cell(6, 2, '', 'LR');
-$pdf->Cell(34, 2, ' Less this Application', 'TLRB');
+$pdf->Cell(34, 2, 'Less this Application', 'TLRB');
 $pdf->Cell(34, 2, '   ', 'TLRB');
 $pdf->Cell(34, 2, '   ', 'TLRB');
 $pdf->Cell(7, 2, '', 'LR');
