@@ -49,6 +49,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				<option value="0" <?php echo isset($iterate_month) && $iterate_month == 0 ? "selected" : '' ?>>Inactive
 				</option>
 			</select>
+			
 		</div>
 	</form>
 </div>
