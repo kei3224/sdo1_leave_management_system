@@ -14,7 +14,6 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
     while ($row = $meta_qry->fetch_assoc()) {
         ${$row['meta_field']} = $row['meta_value'];
     }
-
 }
 $department_qry = $conn->query("SELECT id,name FROM department_list");
 $dept_arr = array_column($department_qry->fetch_all(MYSQLI_ASSOC), 'name', 'id');
@@ -115,7 +114,6 @@ if (isMobileDevice()):
                                     id="manage_leave"><span class="fa fa-cog"></span></button>
                             </div>
                         <?php endif; ?>
-
                         <h5 class="mb-2">Leave Credits</h5>
                         <table class="table table-hover ">
                             <colgroup>
@@ -233,11 +231,11 @@ if (isMobileDevice()):
                 '<h3 class="text-center">Employee\'s Leave Information Year(<?php echo date("Y") ?>)</h3>' +
                 '</div>' +
                 '</div><hr/>');
-                _el.append(_p)
-                var nw = window.open("", "_blank", "width=1200,height=1200")
-                nw.document.write(_el.html())
-                nw.document.close()
-                setTimeout(() => {
+            _el.append(_p)
+            var nw = window.open("", "_blank", "width=1200,height=1200")
+            nw.document.write(_el.html())
+            nw.document.close()
+            setTimeout(() => {
                 nw.print()
                 setTimeout(() => {
                     nw.close()
