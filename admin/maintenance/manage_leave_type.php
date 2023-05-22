@@ -41,16 +41,13 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 				<option value="0" <?php echo isset($status) && $status == 0 ? "selected" : '' ?>>Inactive</option>
 			</select>
 		</div>
-		<div class="form-group">
+		<!-- <div class="form-group">
 			<label for="iterate_month" class="control-label">Iteration</label>
 			<select name="iterate_month" id="iterate_month" class="custom-select rounded-0" required>
-				<option value="1" <?php echo isset($iterate_month) && $iterate_month == 1 ? "selected" : '' ?>>Active
-				</option>
-				<option value="0" <?php echo isset($iterate_month) && $iterate_month == 0 ? "selected" : '' ?>>Inactive
-				</option>
+				<option value="1" <?php //echo isset($iterate_month) && $iterate_month == 1 ? "selected" : '' ?>>Active</option>
+				<option value="0" <?php //echo isset($iterate_month) && $iterate_month == 0 ? "selected" : '' ?>>Inactive</option>
 			</select>
-			
-		</div>
+		</div> -->
 	</form>
 </div>
 <script>

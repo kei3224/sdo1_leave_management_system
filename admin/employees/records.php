@@ -147,10 +147,10 @@ if (isMobileDevice()):
                                                 <?php echo $row['code'] ?>
                                             </td>
                                             <td>
-                                                <?php echo number_format($allowed) ?>
+                                                <?php echo number_format($allowed, 2) ?>
                                             </td>
                                             <td>
-                                                <?php echo number_format($available, 1) ?>
+                                                <?php echo number_format($available, 2) ?>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
